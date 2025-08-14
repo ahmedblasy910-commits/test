@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المكتبة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .book-card {
+            transition: all 0.3s ease;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        /* تخصيصات للعرض باللغة العربية */
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- العنوان الرئيسي -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl font-bold text-blue-800">نظام إدارة المكتبة</h1>
+            <p class="text-gray-600 mt-2">نظام بسيط لإدارة الكتب باستخدام المصفوفات</p>
+        </header>
+
+        <!-- نموذج إضافة كتاب -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-blue-700">إضافة كتاب جديد</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">عنوان الكتاب</label>
+                    <input type="text" id="title" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">اسم المؤلف</label>
+                    <input type="text" id="author" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">سنة النشر</label>
+                    <input type="number" id="year" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                </div>
+                <button onclick="addBook()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                    إضافة الكتاب
+                </button>
+            </div>
+        </div>
+
+        <!-- قسم البحث -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-blue-700">بحث عن كتاب</h2>
+            <div class="flex space-x-4">
+                <input type="text" id="searchTerm" placeholder="ابحث بالعنوان أو المؤلف..." class="flex-1 border border-gray-300 rounded-md p-2">
+                <button onclick="searchBooks()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+                    بحث
+                </button>
+            </div>
+        </div>
+
+        <!-- عرض الكتب -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-blue-700">قائمة الكتب</h2>
+                <button onclick="displayBooks()" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-300 transition">
+                    تحديث القائمة
+                </button>
+            </div>
+            
+            <div id="booksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- سيتم عرض الكتب هنا بشكل ديناميكي -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================
+        // الجزء الأول: تعريف مصفوفة الكتب والبيانات الأولية
+        // ==============================================
+        
+        // مصفوفة لتخزين الكتب (كل كتاب عبارة عن كائن)
+        let books = [
+            {
+                title: "تعلم البرمجة مع JavaScript",
+                author: "أحمد محمد",
+                year: 2020
+            },
+            {
+                title: "أساسيات هياكل البيانات",
+                author: "سمية علي",
+                year: 2019
+            },
+            {
+                title: "التعلم العميق من الصفر",
+                author: "خالد عبد الله",
+                year: 2021
+            }
+        ];
+        
+        // ==============================================
+        // الجزء الثاني: وظائف إدارة الكتب
+        // ==============================================
+        
+        // 1. دالة لإضافة كتاب جديد
+        function addBook() {
+            // الحصول على قيم المدخلات من النموذج
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const year = parseInt(document.getElementById('year').value);
+            
+            // التحقق من عدم وجود حقق فارغة
+            if (!title || !author || !year) {
+                alert("الرجاء ملء جميع الحقول!");
+                return;
+            }
+            
+            // إنشاء كائن الكتاب وإضافته إلى المصفوفة
+            const newBook = { title, author, year };
+            books.push(newBook);
+            
+            // عرض رسالة نجاح
+            alert(`تم إضافة الكتاب "${title}" بنجاح!`);
+            
+            // عرض الكتب المحدثة
+            displayBooks();
+            
+            // تفريغ النموذج
+            document.getElementById('title').value = '';
+            document.getElementById('author').value = '';
+            document.getElementById('year').value = '';
+        }
+        
+        // 2. دالة لعرض جميع الكتب
+        function displayBooks() {
+            const container = document.getElementById('booksContainer');
+            container.innerHTML = '';
+            
+            if (books.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">لا توجد كتب في المكتبة</p>';
+                return;
+            }
+            
+            // استخدام دالة forEach للتنقل في المصفوفة وعرض الكتب
+            books.forEach((book, index) => {
+                const bookCard = `
+                    <div class="book-card bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg mb-1">${book.title}</h3>
+                            <p class="text-gray-600 mb-1">المؤلف: ${book.author}</p>
+                            <p class="text-gray-600 mb-3">السنة: ${book.year}</p>
+                            <button onclick="deleteBook(${index})" class="text-red-600 hover:text-red-800">
+                                حذف الكتاب
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += bookCard;
+            });
+        }
+        
+        // 3. دالة للبحث عن كتب
+        function searchBooks() {
+            const searchTerm = document.getElementById('searchTerm').value.toLowerCase();
+            
+            if (!searchTerm) {
+                alert("الرجاء إدخال كلمة للبحث");
+                return;
+            }
+            
+            // استخدام دالة filter للبحث في المصفوفة
+            const results = books.filter(book => 
+                book.title.toLowerCase().includes(searchTerm) || 
+                book.author.toLowerCase().includes(searchTerm)
+            );
+            
+            const container = document.getElementById('booksContainer');
+            container.innerHTML = '';
+            
+            if (results.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">لا يوجد نتائج للبحث</p>';
+                return;
+            }
+            
+            // عرض نتائج البحث
+            results.forEach((book, index) => {
+                const bookCard = `
+                    <div class="book-card bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg mb-1">${book.title}</h3>
+                            <p class="text-gray-600 mb-1">المؤلف: ${book.author}</p>
+                            <p class="text-gray-600 mb-3">السنة: ${book.year}</p>
+                            <button onclick="deleteBook(${books.indexOf(book)})" class="text-red-600 hover:text-red-800">
+                                حذف الكتاب
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += bookCard;
+            });
+        }
+        
+        // 4. دالة لحذف كتاب
+        function deleteBook(index) {
+            if (confirm(`هل أنت متأكد من حذف الكتاب "${books[index].title}"؟`)) {
+                // استخدام دالة splice لحذف العنصر من المصفوفة
+                const deletedBook = books.splice(index, 1)[0];
+                alert(`تم حذف الكتاب "${deletedBook.title}"`);
+                displayBooks();
+            }
+        }
+        
+        // عرض الكتب عند تحميل الصفحة
+        window.onload = displayBooks;
+    </script>
+</body>
+</html>
